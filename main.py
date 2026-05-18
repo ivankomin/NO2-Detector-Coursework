@@ -17,7 +17,7 @@ def main():
     }
 
     BUFFER_KM = 15
-    START_DATE = "2020-01-01"
+    START_DATE = "2022-01-01"
     END_DATE = "2025-12-31"
 
     all_datasets = []
