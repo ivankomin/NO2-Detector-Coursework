@@ -36,8 +36,7 @@ def main():
             os.makedirs("data", exist_ok=True)
             df_city_raw.to_csv(cache_path)
 
-        # Розрахунок приземної концентрації (мкг/м3) та створення таргета
-        # Замість percentile_threshold=85.0
+        # Розрахунок приземної концентрації (мкг/м3) та створення таргету
         df_city_target = create_target_variable(df_city_raw, absolute_limit_ug_m3=25.0)
         df_city_features = add_comprehensive_features(df_city_target)
         df_city_features["city"] = city_name
@@ -46,7 +45,6 @@ def main():
 
     # 1. Об'єднання
     df_final = pd.concat(all_datasets, axis=0).sort_index()
-    # Відразу після об'єднання df_final = pd.concat(...)
     print(
         f"\nМаксимальне зафіксоване значення NO2: {df_final['NO2_ug_m3'].max():.2f} мкг/м3"
     )
@@ -64,7 +62,6 @@ def main():
 
     # 2. Очищення від витоку даних (Data Leakage)
     # Ми видаляємо сирий NO2, розрахований NO2, таргет, хмарність і назву міста.
-    # Зверніть увагу: ми ЗАЛИШАЄМО 'boundary_layer_height', бо це погодний фактор.
     leakage_cols = [
         "NO2_column_number_density",
         "NO2_ug_m3",
@@ -77,21 +74,22 @@ def main():
 
     # 3. Розподіл даних та розрахунок ваги для XGBoost
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
+        X,
+        y,
+        test_size=0.2,
+        random_state=42,
+        stratify=y,  # stratify для збереження пропорції класів у тренувальній та тестовій вибірках
     )
 
     imbalance_ratio = (total_days - exceeded_days) / exceeded_days
 
     # 4. Навчання
-    metrics = train_and_evaluate(X_train, X_test, y_train, y_test, use_smote=False, pos_weight=imbalance_ratio)
+    metrics = train_and_evaluate(
+        X_train, X_test, y_train, y_test, use_smote=False, pos_weight=imbalance_ratio
+    )
 
-    # БЛОК 6 у файлі main.py
-    print("\n" + "=" * 60)
-    print("ПОРІВНЯЛЬНИЙ АНАЛІЗ МОДЕЛЕЙ (ФІЗИЧНА PBLH МОДЕЛЬ):")
-    print("=" * 60)
     for name, data in metrics.items():
         print(f"\nМодель: {name}")
-        print("-" * 30)
         print(data["full_report"])
         print("*" * 60)
 

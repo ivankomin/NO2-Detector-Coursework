@@ -26,23 +26,27 @@ def _fetch_collection_time_series(
     start = ee.Date(start_date)
     end = ee.Date(end_date)
     n_days = end.difference(start, "days")
+    # create a list of day offsets from the start date
     day_list = ee.List.sequence(0, n_days.subtract(1))
 
     def process_day(day_offset):
+        # create a date from the day offset and filter the collection to that day
         date = start.advance(day_offset, "days")
         daily_coll = coll.filterDate(date, date.advance(1, "days"))
 
+        # calculate the mean for that day and return it as a feature with the date as a property
         mean_obj = daily_coll.mean().reduceRegion(
             reducer=ee.Reducer.mean(), geometry=roi, scale=scale, maxPixels=1e9
         )
-        # Увага на 'yyyy-MM-dd', щоб pandas правильно розпізнав дати
         return ee.Feature(None, mean_obj.set("date", date.format("yyyy-MM-dd")))
 
+    # fetch the features for all days and load them into a pandas DataFrame
     features = ee.FeatureCollection(day_list.map(process_day)).getInfo()["features"]
 
     records = []
     for f in features:
         props = f["properties"]
+        # ignore records where all bands are None (e.g. due to cloud cover or no data)
         if props and any(props.get(b) is not None for b in bands):
             records.append(props)
 
