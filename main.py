@@ -8,7 +8,6 @@ from src.models import train_and_evaluate
 
 
 def main():
-    print("=== ЗАПУСК МУЛЬТИМІСТОВОЇ СИСТЕМИ (PBLH КОНВЕРТАЦІЯ) ===")
     initialize_gee()
 
     cities_config = {
