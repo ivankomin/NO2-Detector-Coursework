@@ -84,10 +84,9 @@ def train_and_evaluate(
 
     print("\n\tТренування моделей та розрахунок метрик:")
     for name, model in models.items():
-        # 1. Навчання моделі
         model.fit(X_train_final, y_train_final)
 
-        # 2. Отримання прогнозів класів (0 або 1) та ймовірностей (0.0 - 1.0)
+        # Отримання прогнозів класів (0 або 1) та ймовірностей (0.0 - 1.0)
         # ПРОГНОЗ РОБИТЬСЯ НА ОРИГІНАЛЬНИХ ТЕСТОВИХ ДАНИХ (X_test_scaled)
         preds = model.predict(X_test_scaled)
 
@@ -96,12 +95,9 @@ def train_and_evaluate(
         else:
             probs = preds
 
-        # 3. Розрахунок PR-AUC та ROC-AUC
         precision, recall, _ = precision_recall_curve(y_test, probs)
         pr_auc = auc(recall, precision)
         roc_auc = roc_auc_score(y_test, probs)
-
-        # 4. Звіт
         base_report = classification_report(y_test, preds, zero_division=0)
 
         custom_full_report = (

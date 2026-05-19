@@ -116,7 +116,6 @@ def get_comprehensive_data(
         "ECMWF/ERA5/HOURLY", ["boundary_layer_height"], roi, start_date, end_date, 10000
     )
 
-    # Об'єднання
     df_merged = df_no2.join([df_co, df_so2, df_aer, df_meteo, df_pblh], how="inner")
     df_merged = df_merged[df_merged["cloud_fraction"] <= 0.3]
 
